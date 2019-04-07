@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
-    public GameObject hazard;
+    public GameObject[] hazards;
     public Vector3 spawnValues;
     public int hazardCount;
     public float spawnWait;
@@ -15,6 +15,8 @@ public class GameController : MonoBehaviour
 
     public Text scoreText;
     private int score;
+    public Text winText;
+    public Text creditText;
     public Text gameOverText;
     public Text restartText;
 
@@ -25,8 +27,10 @@ public class GameController : MonoBehaviour
     {
         gameOver = false;
         restart = false;
+        winText.text = "";
         restartText.text = "";
         gameOverText.text = "";
+        creditText.text = "";
         score = 0;
         UpdateScore();
         StartCoroutine (SpawnWaves ());
@@ -36,7 +40,7 @@ public class GameController : MonoBehaviour
     {
         if (restart)
         {
-            if (Input.GetKeyDown(KeyCode.R))
+            if (Input.GetKey(KeyCode.Space))
             {
                 SceneManager.LoadScene("SampleScene");
             }
@@ -50,7 +54,6 @@ public class GameController : MonoBehaviour
 
     public void UpdateLose()
     {
-        gameOverText.text = "GAME OVER";
         gameOver = true;
     }
 
@@ -62,7 +65,13 @@ public class GameController : MonoBehaviour
 
     void UpdateScore()
     {
-        scoreText.text = "Score: " + score;
+        scoreText.text = "Points: " + score;
+        if (score >= 100)
+        {
+            winText.text = "YOU WIN!";
+            creditText.text = "GAME MADE BY AUSTIN SAMBELLS";
+            gameOver = true;
+        }
     }
 
     IEnumerator SpawnWaves()
@@ -72,15 +81,18 @@ public class GameController : MonoBehaviour
         {
             for (int i = 0; i < hazardCount; i++)
             {
+                GameObject hazard = hazards[Random.Range(0, hazards.Length)];
                 Vector3 spawnPosition = new Vector3(Random.Range(-spawnValues.x, spawnValues.x), spawnValues.y, spawnValues.z);
                 Quaternion spawnRotation = Quaternion.identity;
                 Instantiate(hazard, spawnPosition, spawnRotation);
                 yield return new WaitForSeconds(spawnWait);
             }
             yield return new WaitForSeconds(waveWait);
+
             if (gameOver)
             {
-                restartText.text = "Press (R) to Restart";
+                gameOverText.text = "GAME OVER";
+                restartText.text = "Press (Space) to Restart";
                 restart = true;
                 break;
             }
